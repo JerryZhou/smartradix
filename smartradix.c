@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define __CP printf
+#define __CP(...) (void)0
+//#define __CP(...) printf
 
 #define __xout
 #define __xin
@@ -207,14 +208,6 @@ int smartBytes(
             smart, buflen, buf);
 }
 
-void test_size(unsigned long long size, int maxu, int maxv) {
-    char buf[256] = {0};
-    smartBytes(576, maxu, maxv, 256, buf);
-    smartBytes(1024 + 576, maxu, maxv, 256, buf);
-    smartBytes(1024*1024*2 + 1024*5 + 576, maxu, maxv, 256, buf);
-    smartBytes(size, maxu, maxv, 256, buf);
-}
-
 const SmartRadix _alltimes[] = {
     //{"nano", 1000},
     //{"micro", 1000},
@@ -222,7 +215,8 @@ const SmartRadix _alltimes[] = {
     {"secs", 60}, 
     {"minutes", 60}, 
     {"hour", 24}, 
-    {"day", 365}, 
+    {"day", 30}, 
+    {"month", 12}, 
     {"year", 365}};
 int smartTime(
         __xin unsigned long long size, 
@@ -258,15 +252,38 @@ int smartTimeDiff(
 
 }
 
+#define __XOUT printf
+
+void test_size(unsigned long long size, int maxu, int maxv) {
+    char buf[256] = {0};
+    smartBytes(576, maxu, maxv, 256, buf);
+    __XOUT("%llu bytes --> %s\n", 576ll, buf);
+    smartBytes(1024 + 576, maxu, maxv, 256, buf);
+    __XOUT("%llu bytes --> %s\n", 576ll + 1024, buf);
+    smartBytes(1024*1024*2 + 1024*5 + 576, maxu, maxv, 256, buf);
+    __XOUT("%llu bytes --> %s\n", 576ll + 1024*1024*2 + 1024*5, buf);
+    smartBytes(size, maxu, maxv, 256, buf);
+    __XOUT("%llu bytes --> %s\n", size, buf);
+}
+
 void test_time(unsigned long long size, int maxu, int maxv) {
     char buf[256] = {0};
     smartTime(size, maxu, maxv, 256, buf);
+    __XOUT("%llu mills --> %s\n", size, buf);
 
     smartTimeDiff(0, 1000, maxu, 1, 256, buf);
+    __XOUT("%llu, %llu diff mills --> %s\n", 0ll, 1000ll, buf);
 
     smartTimeDiff(1000, 1000, maxu, 1, 256, buf);
+    __XOUT("%llu, %llu diff mills --> %s\n", 1000ll, 1000ll, buf);
 
     smartTimeDiff(1000, 0, maxu, 2, 256, buf);
+    __XOUT("%llu, %llu diff mills --> %s\n", 1000ll, 0ll, buf);
+
+    unsigned long long ts = 1000ll * 60 * 60 * 24 * 30 * 12;
+
+    smartTimeDiff(0, ts, maxu, 2, 256, buf);
+    __XOUT("%llu, %llu diff mills --> %s\n", 0ll, ts, buf);
 }
 
 int main(int argc, const char* argv[]) {
